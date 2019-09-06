@@ -1,0 +1,61 @@
+<table>
+  <tr>
+    <td style="text-align: center; vertical-align: middle;"><img src="_docs/logo_aws.jpg"/></td>
+    <td style="text-align: center; vertical-align: middle;"><img src="_docs/logo_adv.jpg"/></td>
+  </tr> 
+<table>
+
+# AWS EC2 Bastion Terraform module
+
+## I - Infrastructure components
+
+This module aims to create resilient bastion. This module creates for each bastion creates:
+
+### I.1 - AWS Network Load Balancer
+
+Name : **{{environment}}**-bastion-nlb
+
+### I.2 - AWS AutoScaling groups
+
+Name: **{{environment}}**-bastion-asg
+
+### I.3 - AWS Launch Configuration
+
+Name: **{{environment}}**-bastion-instance-lc
+
+### I.4 - AWS EC2 instance
+
+Name: **{{environment}}**-bastion
+
+## II - Inputs / Outputs
+
+!INCLUDE "data.md", 0
+
+## III - Usage
+
+`````
+
+module "sample"
+  environment                = "stage"
+  auto_scaling_group_subnets = ["subnet-09431a12fc6xxxxx","subnet-09431a12fc6yyyyy"]
+  region                     = "eu-west-3"
+  bastion_host_key_pair      = "my-keypair"
+  bastion_instance_count     = "1"
+  bucket_name                = "mybucket-bastion-logs"
+  bucket_force_destroy       = true
+  cidrs                      = "10.0.0.0/16"
+  elb_subnets                = ["subnet-09431a12fc6wwwwww","subnet-09431a12fc6zzzzz"]
+  is_lb_private              = "false"
+  log_expiry_days            = "90"
+  log_glacier_days           = "60"
+  log_standard_ia_days       = "10"
+  private_ssh_port           = "22"
+  public_ssh_port            = "2"
+  vpc_id                     = "vpc-08543dc6bb8b6xxxx"
+
+  tags = {
+    Name        = stage-bastion"
+    Environment = "stage"
+  }
+
+`````

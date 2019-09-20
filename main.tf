@@ -66,7 +66,7 @@ resource "aws_security_group" "bastion_host_security_group" {
     from_port   = var.public_ssh_port
     protocol    = "TCP"
     to_port     = 22
-    cidr_blocks = var.elb_subnets
+    cidr_blocks = var.elb_cidr_subnets
   }
 
   egress {
@@ -155,14 +155,10 @@ resource "aws_route53_record" "bastion_record_name" {
 
 resource "aws_lb" "bastion_lb" {
   name     = "${var.environment}-bastion-nlb"
-  internal =  var.is_lb_private
-
+  internal =  false
   subnets = var.elb_subnets
-
   load_balancer_type = "network"
-
   tags = merge(var.tags, map("Name","${var.environment}-bastion-nlb","Environment",var.environment  ))
-  
 }
 
 resource "aws_lb_target_group" "bastion_lb_target_group" {

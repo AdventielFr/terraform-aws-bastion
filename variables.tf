@@ -72,6 +72,11 @@ variable "elb_subnets" {
   description = "List of subnet were the ELB will be deployed"
 }
 
+variable "elb_cidr_subnets_" {
+  type        = list(string)
+  description = "List CIDR of subnet were the ELB will be deployed"
+}
+
 variable "auto_scaling_group_subnets" {
   type        = list(string)
   description = "List of subnet were the Auto Scalling Group will deploy the instances"
@@ -111,14 +116,4 @@ variable "public_ssh_port" {
   type        = number
   description = "Set the SSH port to use from desktop to the bastion"
   default     = 22
-}
-
-variable "public_security_group" {
-  type = string
-  default = ""
-}
-
-variable "private_security_group" {
-  type = string
-  default = ""
 }

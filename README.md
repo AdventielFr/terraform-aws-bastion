@@ -33,7 +33,6 @@ Name: **{{environment}}**-bastion
 
 | Name | Description | Type | Default |
 |------|-------------|:----:|:-----:|
-| associate\_public\_ip\_address |  | bool | true |
 | auto\_scaling\_group\_subnets | List of subnet were the Auto Scalling Group will deploy the instances | list(string) | n/a |
 | bastion\_dns\_record\_name | The DNS record name to use for the bastion | string | "" |
 | bastion\_dns\_zone\_id | The ID of the hosted zone were we'll register the bastion DNS name | string | "" |
@@ -46,13 +45,11 @@ Name: **{{environment}}**-bastion
 | cidrs | List of CIDRs than can access to the bastion. Default : 0.0.0.0/0 | list(string) | \["0.0.0.0/0",\] |
 | elb\_subnets | List of subnet were the ELB will be deployed | list(string) | n/a |
 | environment | The environment | string | n/a |
-| is\_lb\_private | If TRUE the load balancer scheme will be \ | bool | false |
 | log\_auto\_clean | Enable or not the lifecycle | bool | false |
 | log\_expiry\_days | Number of days before logs expiration | number | 90 |
 | log\_glacier\_days | Number of days before moving logs to Glacier | number | 60 |
 | log\_standard\_ia\_days | Number of days before moving logs to IA Storage | number | 30 |
 | private\_security\_group |  | string | "" |
-| private\_ssh\_port | Set the SSH port to use between the bastion and private instance | number | 22 |
 | public\_security\_group |  | string | "" |
 | public\_ssh\_port | Set the SSH port to use from desktop to the bastion | number | 22 |
 | region | The deployment aws region | string | n/a |
@@ -63,10 +60,9 @@ Name: **{{environment}}**-bastion
 
 | Name | Description |
 |------|-------------|
-| bastion\_host\_security\_group |  |
-| bucket\_name |  |
-| dns\_name |  |
-| private\_instances\_security\_group |  |
+| bastion\_host\_security\_group | The security group of the bastion |
+| bucket\_name | The S3 Bucker to save log of the bastion |
+| dns\_name | The DNS of the bastion |
 
 ## III - Usage
 

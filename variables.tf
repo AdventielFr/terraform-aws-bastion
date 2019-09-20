@@ -72,7 +72,7 @@ variable "elb_subnets" {
   description = "List of subnet were the ELB will be deployed"
 }
 
-variable "elb_cidr_subnets_" {
+variable "elb_subnets_cidr" {
   type        = list(string)
   description = "List CIDR of subnet were the ELB will be deployed"
 }

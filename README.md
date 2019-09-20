@@ -44,13 +44,12 @@ Name: **{{environment}}**-bastion
 | bucket\_versioning | Enable bucket versioning or not | bool | true |
 | cidrs | List of CIDRs than can access to the bastion. Default : 0.0.0.0/0 | list(string) | \["0.0.0.0/0",\] |
 | elb\_subnets | List of subnet were the ELB will be deployed | list(string) | n/a |
+| elb\_subnets\_cidr | List CIDR of subnet were the ELB will be deployed | list(string) | n/a |
 | environment | The environment | string | n/a |
 | log\_auto\_clean | Enable or not the lifecycle | bool | false |
 | log\_expiry\_days | Number of days before logs expiration | number | 90 |
 | log\_glacier\_days | Number of days before moving logs to Glacier | number | 60 |
 | log\_standard\_ia\_days | Number of days before moving logs to IA Storage | number | 30 |
-| private\_security\_group |  | string | "" |
-| public\_security\_group |  | string | "" |
 | public\_ssh\_port | Set the SSH port to use from desktop to the bastion | number | 22 |
 | region | The deployment aws region | string | n/a |
 | tags | A mapping of tags to assign | "map" | {} |

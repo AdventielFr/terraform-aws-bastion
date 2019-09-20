@@ -39,12 +39,6 @@ variable "cidrs" {
   ]
 }
 
-variable "is_lb_private" {
-  type        = bool
-  default     = false
-  description = "If TRUE the load balancer scheme will be \"internal\" else \"internet-facing\""
-}
-
 variable "vpc_id" {
   type        = string
   description = "VPC id were we'll deploy the bastion"
@@ -83,11 +77,6 @@ variable "auto_scaling_group_subnets" {
   description = "List of subnet were the Auto Scalling Group will deploy the instances"
 }
 
-variable "associate_public_ip_address" {
-  type    = bool
-  default = true
-}
-
 variable "bastion_instance_count" {
   type = number
   description = "The count of instance of bastion"
@@ -121,12 +110,6 @@ variable "log_expiry_days" {
 variable "public_ssh_port" {
   type        = number
   description = "Set the SSH port to use from desktop to the bastion"
-  default     = 22
-}
-
-variable "private_ssh_port" {
-  type        = number
-  description = "Set the SSH port to use between the bastion and private instance"
   default     = 22
 }
 

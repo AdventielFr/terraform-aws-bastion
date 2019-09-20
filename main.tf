@@ -58,15 +58,15 @@ resource "aws_s3_bucket_object" "bucket_public_keys_readme" {
 }
 
 resource "aws_security_group" "bastion_host_security_group" {
-  name        = "${var.environment}-bastion-from-internet-sg"
-  description = "Enable SSH access to the bastion host from internet via SSH port"
+  name        = "${var.environment}-bastion-from-nlb-sg"
+  description = "Enable SSH access to the bastion host from network load balancer subnets"
   vpc_id      = var.vpc_id
 
   ingress {
     from_port   = var.public_ssh_port
     protocol    = "TCP"
-    to_port     = var.public_ssh_port
-    cidr_blocks = var.cidrs
+    to_port     = 22
+    cidr_blocks = var.elb_subnets
   }
 
   egress {
@@ -75,30 +75,7 @@ resource "aws_security_group" "bastion_host_security_group" {
     to_port     = 65535
     cidr_blocks = ["0.0.0.0/0"]
   }
-
-  tags = {
-    Name        = "${var.environment}-bastion-from-internet-sg"
-    Environment = var.environment
-  }
-}
-
-resource "aws_security_group" "private_instances_security_group" {
-  name        = "${var.environment}-bastion-from-private-sg"
-  description = "Enable SSH access to the Private instances from the bastion via SSH port"
-  vpc_id      = var.vpc_id
-
-  ingress {
-    from_port = var.private_ssh_port
-    protocol  = "TCP"
-    to_port   = var.private_ssh_port
-
-    security_groups = [aws_security_group.bastion_host_security_group.id]
-  }
-
-  tags = {
-    Name        = "${var.environment}-bastion-from-private-sg"
-    Environment = var.environment
-  }
+  tags = merge(var.tags, map("Name","${var.environment}-bastion-from-nlb","Environment",var.environment  ))
 }
 
 resource "aws_iam_role" "bastion_host_role" {
@@ -124,10 +101,8 @@ resource "aws_iam_role" "bastion_host_role" {
 }
 EOF
 
-  tags = {
-    Name        = "${var.environment}-bastion-role"
-    Environment = var.environment
-  }
+  tags = merge(var.tags, map("Name","${var.environment}-bastion-role","Environment",var.environment  ))
+  
 }
 
 resource "aws_iam_role_policy" "bastion_host_role_policy" {
@@ -186,15 +161,13 @@ resource "aws_lb" "bastion_lb" {
 
   load_balancer_type = "network"
 
-  tags = {
-    Name        = "${var.environment}-bastion-nlb"
-    Environment = var.environment
-  }
+  tags = merge(var.tags, map("Name","${var.environment}-bastion-nlb","Environment",var.environment  ))
+  
 }
 
 resource "aws_lb_target_group" "bastion_lb_target_group" {
   name        = "${var.environment}-bastion-tg"
-  port        = var.public_ssh_port
+  port        = 22
   protocol    = "TCP"
   vpc_id      = var.vpc_id
   target_type = "instance"
@@ -204,13 +177,10 @@ resource "aws_lb_target_group" "bastion_lb_target_group" {
     protocol = "TCP"
   }
 
-  tags = {
-    Name        = "${var.environment}-bastion-tg"
-    Environment = var.environment
-  }
+  tags = merge(var.tags, map("Name","${var.environment}-bastion-tg","Environment",var.environment  ))
 }
 
-resource "aws_lb_listener" "bastion_lb_listener_22" {
+resource "aws_lb_listener" "bastion_lb_listener" {
   default_action {
     target_group_arn = aws_lb_target_group.bastion_lb_target_group.arn
     type             = "forward"
@@ -230,7 +200,7 @@ resource "aws_launch_configuration" "bastion_launch_configuration" {
   name                        = "${var.environment}-bastion-instance-lc"
   image_id                    = data.aws_ami.amazon-linux-2.id
   instance_type               = var.bastion_instance_type
-  associate_public_ip_address = var.associate_public_ip_address
+  associate_public_ip_address = false
   enable_monitoring           = true
   iam_instance_profile        = aws_iam_instance_profile.bastion_host_profile.name
   key_name                    = var.bastion_host_key_pair
@@ -263,17 +233,7 @@ resource "aws_autoscaling_group" "bastion_auto_scaling_group" {
     "OldestLaunchConfiguration",
   ]
 
-  tag {
-    key                 = "Name"
-    value               = "${var.environment}-bastion"
-    propagate_at_launch = true
-  }
-
-  tag {
-    key                 = "Environment"
-    value               = "${var.environment}"
-    propagate_at_launch = true
-  }
+  tags = merge(var.tags, map("Name","${var.environment}-bastion","Environment", var.environment  ))
 
   lifecycle {
     create_before_destroy = true

@@ -1,12 +1,3 @@
-resource "random_integer" "bastion_port" {
-  min     = 5000
-  max     = 6000
-  keepers = {
-    # Generate a new integer each time we switch to a new listener ARN
-    listener_arn = "${var.listener_arn}"
-  }
-}
-
 
 data "aws_ami" "amazon-linux-2" {
   most_recent = true

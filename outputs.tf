@@ -17,8 +17,3 @@ output "private_instances_security_group" {
    description =  "The security group attached to the ec2 instances"
   value = aws_security_group.private_instances_security_group.id
 }
-
-output "bastion_port" {
-  description =" The bastion port"
-  value = local.bastion_port
-}

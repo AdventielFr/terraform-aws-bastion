@@ -62,7 +62,6 @@ Name: **{{environment}}**-bastion
 | Name | Description |
 |------|-------------|
 | bastion\_host\_security\_group | The security group attached to the network load balancer |
-| bastion\_port | The bastion port |
 | bucket\_name | The bucket that logs shell commands passed on the bastion. |
 | dns\_name | The fqdn of the bastion |
 | private\_instances\_security\_group | The security group attached to the ec2 instances |

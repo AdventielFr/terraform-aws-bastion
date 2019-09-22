@@ -23,7 +23,7 @@ variable "bucket_force_destroy" {
 variable "tags" {
   description = "A mapping of tags to assign"
   default     = {}
-  type        = "map"
+  type        = map
 }
 
 variable "region" {
@@ -37,6 +37,12 @@ variable "cidrs" {
   default = [
     "0.0.0.0/0",
   ]
+}
+
+variable "is_lb_private" {
+  type        = bool
+  default     = false
+  description = "If TRUE the load balancer scheme will be \"internal\" else \"internet-facing\""
 }
 
 variable "vpc_id" {
@@ -70,11 +76,6 @@ variable "bastion_dns_record_name" {
 variable "elb_subnets" {
   type        = list(string)
   description = "List of subnet were the ELB will be deployed"
-}
-
-variable "elb_subnets_cidr" {
-  type        = list(string)
-  description = "List CIDR of subnet were the ELB will be deployed"
 }
 
 variable "auto_scaling_group_subnets" {
@@ -112,8 +113,18 @@ variable "log_expiry_days" {
   default     = 90
 }
 
-variable "public_ssh_port" {
+variable "bastion_port" {
   type        = number
-  description = "Set the SSH port to use from desktop to the bastion"
-  default     = 22
+  description = "Set the SSH port to use to access to the bastion"
+  default     = 22 
+}
+
+variable "public_security_group" {
+  type = string
+  default = ""
+}
+
+variable "private_security_group" {
+  type = string
+  default = ""
 }

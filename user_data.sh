@@ -13,6 +13,8 @@ chown ec2-user:ec2-user /var/log/bastion
 chmod -R 770 /var/log/bastion
 setfacl -Rdm other:0 /var/log/bastion
 
+# Set bastion port 
+echo -e "\\Port ${bastion_port}"
 # Make OpenSSH execute a custom script on logins
 echo -e "\\nForceCommand /usr/bin/bastion/shell" >> /etc/ssh/sshd_config
 

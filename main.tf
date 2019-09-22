@@ -1,16 +1,52 @@
+resource "random_integer" "bastion_port" {
+  min     = 5000
+  max     = 6000
+  keepers = {
+    # Generate a new integer each time we switch to a new listener ARN
+    listener_arn = "${var.listener_arn}"
+  }
+}
+
+
+data "aws_ami" "amazon-linux-2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
+  }
+
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
 data "template_file" "user_data" {
   template = "${file("${path.module}/user_data.sh")}"
 
   vars = {
     aws_region  = var.region
     bucket_name = var.bucket_name
+    bastion_port = var.bastion_port
   }
 }
 
 locals {
   create_dns_record = var.bastion_dns_zone_id != "" && var.bastion_dns_record_name != "" ? true : false
+  tags_asg_format = ["${null_resource.tags_as_list_of_maps.*.triggers}"]
 }
 
+resource "null_resource" "tags_as_list_of_maps" {
+  count = "${length(keys(var.tags))}"
+
+  triggers = "${map(
+    "key", "${element(keys(var.tags), count.index)}",
+    "value", "${element(values(var.tags), count.index)}",
+    "propagate_at_launch", "true"
+  )}"
+}
 
 resource "aws_s3_bucket" "bucket" {
   bucket = var.bucket_name
@@ -58,15 +94,15 @@ resource "aws_s3_bucket_object" "bucket_public_keys_readme" {
 }
 
 resource "aws_security_group" "bastion_host_security_group" {
-  name        = "${var.environment}-bastion-from-nlb-sg"
-  description = "Enable SSH access to the bastion host from network load balancer subnets"
+  name        = "${var.environment}-bastion-from-internet-sg"
+  description = "Enable SSH access to the bastion host from internet via SSH port"
   vpc_id      = var.vpc_id
 
   ingress {
-    from_port   = var.public_ssh_port
+    from_port   = var.bastion_port
     protocol    = "TCP"
-    to_port     = 22
-    cidr_blocks = var.elb_cidr_subnets
+    to_port     = var.bastion_port
+    cidr_blocks = var.cidrs
   }
 
   egress {
@@ -75,7 +111,30 @@ resource "aws_security_group" "bastion_host_security_group" {
     to_port     = 65535
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags = merge(var.tags, map("Name","${var.environment}-bastion-from-nlb","Environment",var.environment  ))
+
+  tags = {
+    Name        = "${var.environment}-bastion-from-internet-sg"
+    Environment = var.environment
+  }
+}
+
+resource "aws_security_group" "private_instances_security_group" {
+  name        = "${var.environment}-bastion-from-private-sg"
+  description = "Enable SSH access to the Private instances from the bastion via SSH port"
+  vpc_id      = var.vpc_id
+
+  ingress {
+    from_port = var.bastion_port
+    protocol  = "TCP"
+    to_port   = var.bastion_port
+
+    security_groups = [aws_security_group.bastion_host_security_group.id]
+  }
+
+  tags = {
+    Name        = "${var.environment}-bastion-from-private-sg"
+    Environment = var.environment
+  }
 }
 
 resource "aws_iam_role" "bastion_host_role" {
@@ -101,8 +160,10 @@ resource "aws_iam_role" "bastion_host_role" {
 }
 EOF
 
-  tags = merge(var.tags, map("Name","${var.environment}-bastion-role","Environment",var.environment  ))
-  
+  tags = {
+    Name        = "${var.environment}-bastion-role"
+    Environment = var.environment
+  }
 }
 
 resource "aws_iam_role_policy" "bastion_host_role_policy" {
@@ -155,15 +216,21 @@ resource "aws_route53_record" "bastion_record_name" {
 
 resource "aws_lb" "bastion_lb" {
   name     = "${var.environment}-bastion-nlb"
-  internal =  false
+  internal =  var.is_lb_private
+
   subnets = var.elb_subnets
+
   load_balancer_type = "network"
-  tags = merge(var.tags, map("Name","${var.environment}-bastion-nlb","Environment",var.environment  ))
+
+  tags = {
+    Name        = "${var.environment}-bastion-nlb"
+    Environment = var.environment
+  }
 }
 
 resource "aws_lb_target_group" "bastion_lb_target_group" {
   name        = "${var.environment}-bastion-tg"
-  port        = 22
+  port        = var.bastion_port
   protocol    = "TCP"
   vpc_id      = var.vpc_id
   target_type = "instance"
@@ -173,7 +240,10 @@ resource "aws_lb_target_group" "bastion_lb_target_group" {
     protocol = "TCP"
   }
 
-  tags = merge(var.tags, map("Name","${var.environment}-bastion-tg","Environment",var.environment  ))
+  tags = {
+    Name        = "${var.environment}-bastion-tg"
+    Environment = var.environment
+  }
 }
 
 resource "aws_lb_listener" "bastion_lb_listener" {
@@ -183,7 +253,7 @@ resource "aws_lb_listener" "bastion_lb_listener" {
   }
 
   load_balancer_arn = aws_lb.bastion_lb.arn
-  port              = var.public_ssh_port
+  port              = var.bastion_port
   protocol          = "TCP"
 }
 
@@ -200,11 +270,8 @@ resource "aws_launch_configuration" "bastion_launch_configuration" {
   enable_monitoring           = true
   iam_instance_profile        = aws_iam_instance_profile.bastion_host_profile.name
   key_name                    = var.bastion_host_key_pair
-
   security_groups = [aws_security_group.bastion_host_security_group.id]
-
   user_data = data.template_file.user_data.rendered
-
   lifecycle {
     create_before_destroy = true
   }
@@ -229,7 +296,17 @@ resource "aws_autoscaling_group" "bastion_auto_scaling_group" {
     "OldestLaunchConfiguration",
   ]
 
-  tags = merge(var.tags, map("Name","${var.environment}-bastion","Environment", var.environment  ))
+  tag {
+    key                 = "Name"
+    value               = "${var.environment}-bastion"
+    propagate_at_launch = true
+  }
+
+  tag {
+    key                 = "Environment"
+    value               = "${var.environment}"
+    propagate_at_launch = true
+  }
 
   lifecycle {
     create_before_destroy = true

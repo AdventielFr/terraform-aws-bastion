@@ -13,8 +13,9 @@ chown ec2-user:ec2-user /var/log/bastion
 chmod -R 770 /var/log/bastion
 setfacl -Rdm other:0 /var/log/bastion
 
+iptables -A INPUT -p tcp -s 0.0.0.0/0 --dport ${bastion_port} -j ACCEPT
 # Set bastion port 
-echo -e "\\Port ${bastion_port}"
+echo -e "\\nPort ${bastion_port}" >> /etc/ssh/sshd_config
 # Make OpenSSH execute a custom script on logins
 echo -e "\\nForceCommand /usr/bin/bastion/shell" >> /etc/ssh/sshd_config
 
@@ -170,6 +171,7 @@ cat > ~/mycron << EOF
 */5 * * * * /usr/bin/bastion/sync_s3
 */5 * * * * /usr/bin/bastion/sync_users
 0 0 * * * yum -y update --security
+0 0 * * * iptables -A INPUT -p tcp -s 0.0.0.0/0 --dport ${bastion_port} -j ACCEPT
 EOF
 crontab ~/mycron
 rm ~/mycron

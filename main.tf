@@ -343,7 +343,7 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
 resource "aws_iam_policy" "find_and_remove_expired_ssh_keys" {
   count = var.with_auto_clean_obsolete_publc_keys ? 1: 0
   name   = "bastion-find-and-remove-expired-ssh-keys-policy"
-  policy = data.aws_iam_policy_document.find_and_remove_expired_ssh_keys[0].json
+  policy = data.aws_iam_policy_document.find_and_remove_expired_ssh_keys.json
 }
 
 resource "aws_iam_role" "find_and_remove_expired_ssh_keys" {

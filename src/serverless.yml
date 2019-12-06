@@ -1,0 +1,41 @@
+service: bastion-find-and-remove-expired-ssh-keys
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+
+provider:
+  name: aws
+  runtime: python3.7
+  stage:  ${opt:stage, 'ops'}
+  timeout: 60
+  memorySize: 128
+  region: ${opt:region, 'eu-west-3'}
+  logRetentionInDays: 7
+
+plugins:
+  - serverless-iam-roles-per-function
+  - serverless-plugin-existing-s3
+  - serverless-python-requirements
+  - serverless-pseudo-parameters
+  - serverless-plugin-log-retention
+package:
+  exclude:
+    - node_modules/**
+    - samples/**
+    - bin/**
+    - include/**
+    - lib/**
+
+functions:
+  find_and_remove_expired_ssh_keys:
+    name: bastion-find-and-remove-expired-ssh-keys
+    handler: lambda_handler.main
+    description: Find and remove public SSH Key in AWS S3 bucket who are obsolete
+    iamRoleStatementsName: bastion-find-and-remove-expired-ssh-keys-role
+    timeout: 60
+    environment:
+      S3_BUCKET: <YOUR-BUCKET>
+      ENV: ${self:provider.stage}
+      SNS_URL: <URL OF SNS TO PUSH RESULT OF LAMBDA>
+    

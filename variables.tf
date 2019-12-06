@@ -27,7 +27,7 @@ variable "tags" {
 }
 
 variable "region" {
-  type        = string 
+  type        = string
   description = "The deployment aws region"
 }
 
@@ -84,9 +84,9 @@ variable "auto_scaling_group_subnets" {
 }
 
 variable "bastion_instance_count" {
-  type = number
+  type        = number
   description = "The count of instance of bastion"
-  default = 1
+  default     = 1
 }
 
 variable "log_auto_clean" {
@@ -116,15 +116,33 @@ variable "log_expiry_days" {
 variable "bastion_port" {
   type        = number
   description = "Set the SSH port to use to access to the bastion"
-  default     = 22 
+  default     = 22
 }
 
 variable "public_security_group" {
-  type = string
+  type    = string
   default = ""
 }
 
 variable "private_security_group" {
-  type = string
+  type    = string
   default = ""
+}
+
+variable "with_auto_clean_obsolete_publc_keys" {
+  type        = bool
+  description = "Activate or deactivate auto cleaner ssh public key in s3 bucker"
+  default     = true
+}
+
+variable "cloudwatch_log_retention" {
+  description = "The cloudwatch log retention ( default 7 days )."
+  default     = 7
+  type        = number
+}
+
+variable "scan_alarm_clock" {
+  description = "The time between two scan to search for expired certificates ( in minutes default 30 minutes)"
+  type        = number
+  default     = 30
 }

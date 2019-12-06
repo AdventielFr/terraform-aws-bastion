@@ -44,6 +44,7 @@ Name: **{{environment}}**-bastion
 | bucket\_name | Bucket name were the bastion will store the logs | string | n/a |
 | bucket\_versioning | Enable bucket versioning or not | bool | true |
 | cidrs | List of CIDRs than can access to the bastion. Default : 0.0.0.0/0 | list(string) | \["0.0.0.0/0",\] |
+| cloudwatch\_log\_retention | The cloudwatch log retention ( default 7 days ). | number | 7 |
 | elb\_subnets | List of subnet were the ELB will be deployed | list(string) | n/a |
 | environment | The environment | string | n/a |
 | is\_lb\_private | If TRUE the load balancer scheme will be \ | bool | false |
@@ -54,8 +55,10 @@ Name: **{{environment}}**-bastion
 | private\_security\_group |  | string | "" |
 | public\_security\_group |  | string | "" |
 | region | The deployment aws region | string | n/a |
+| scan\_alarm\_clock | The time between two scan to search for expired certificates ( in minutes default 30 minutes) | number | 30 |
 | tags | A mapping of tags to assign | map | {} |
 | vpc\_id | VPC id were we'll deploy the bastion | string | n/a |
+| with\_auto\_clean\_obsolete\_publc\_keys | Activate or deactivate auto cleaner ssh public key in s3 bucker | bool | true |
 
 ## Outputs
 

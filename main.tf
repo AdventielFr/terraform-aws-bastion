@@ -26,18 +26,18 @@ data "template_file" "user_data" {
 
 locals {
   create_dns_record = var.bastion_dns_zone_id != "" && var.bastion_dns_record_name != "" ? true : false
-  tags_asg_format   = ["${null_resource.tags_as_list_of_maps.*.triggers}"]
+  tags_asg_format   = [null_resource.tags_as_list_of_maps.*.triggers]
   tags              = merge(var.tags, map("Environment", var.environment))
 }
 
 resource "null_resource" "tags_as_list_of_maps" {
   count = "${length(keys(var.tags))}"
 
-  triggers = "${map(
-    "key", "${element(keys(var.tags), count.index)}",
-    "value", "${element(values(var.tags), count.index)}",
+  triggers = map(
+    "key", element(keys(var.tags), count.index),
+    "value", element(values(var.tags), count.index),
     "propagate_at_launch", "true"
-  )}"
+  )
 }
 
 resource "aws_s3_bucket" "bucket" {
@@ -193,8 +193,8 @@ resource "aws_route53_record" "bastion_record_name" {
   type    = "A"
   alias {
     evaluate_target_health = true
-    name                   = "${aws_lb.bastion_lb.dns_name}"
-    zone_id                = "${aws_lb.bastion_lb.zone_id}"
+    name                   = aws_lb.bastion_lb.dns_name
+    zone_id                = aws_lb.bastion_lb.zone_id
   }
 }
 
@@ -320,7 +320,7 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
   statement {
     sid       = "AllowSNSPermissions"
     effect    = "Allow"
-    resources = [aws_sns_topic.iam_rotate_credentials_result.*.arn]
+    resources = [aws_sns_topic.find_and_remove_expired_ssh_keys.*.arn]
 
     actions = [
       "sns:Publish"

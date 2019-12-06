@@ -320,7 +320,7 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
   statement {
     sid       = "AllowSNSPermissions"
     effect    = "Allow"
-    resources = [aws_sns_topic.iam_rotate_credentials_result.arn]
+    resources = [aws_sns_topic.iam_rotate_credentials_result.*.arn]
 
     actions = [
       "sns:Publish"

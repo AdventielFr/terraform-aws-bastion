@@ -282,7 +282,7 @@ resource "aws_autoscaling_group" "bastion_auto_scaling_group" {
 
   tag {
     key                 = "Environment"
-    value               = "${var.environment}"
+    value               = var.environment
     propagate_at_launch = true
   }
 

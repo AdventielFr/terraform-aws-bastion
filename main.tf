@@ -394,8 +394,8 @@ resource "aws_lambda_function" "find_and_remove_expired_ssh_keys" {
   tags = merge(local.tags, map("Lambda", "bastion-find-and-remove-expired-ssh-keys"))
 
   depends_on = [
-    aws_iam_role_policy_attachment.find_users_to_refresh,
-    aws_cloudwatch_log_group.find_users_to_refresh
+    aws_iam_role_policy_attachment.find_and_remove_expired_ssh_keys,
+    aws_cloudwatch_log_group.find_and_remove_expired_ssh_keys
   ]
 }
 
@@ -427,7 +427,7 @@ resource "aws_cloudwatch_event_target" "find_and_remove_expired_ssh_keys" {
   arn       = aws_lambda_function.find_and_remove_expired_ssh_keys[0].arn
 }
 
-resource "aws_sns_topic" "iam_rotate_credentials_result" {
+resource "aws_sns_topic" "find_and_remove_expired_ssh_keys" {
   name         = "bastion-find-and-remove-expired-ssh-keys-result"
   display_name = "Topic for Bastion Find and Remove SSH public expired key result"
   tags         = local.tags

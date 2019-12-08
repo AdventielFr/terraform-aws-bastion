@@ -31,7 +31,7 @@ locals {
 }
 
 resource "null_resource" "tags_as_list_of_maps" {
-  count = "${length(keys(var.tags))}"
+  count = length(keys(var.tags))
 
   triggers = map(
     "key", element(keys(var.tags), count.index),

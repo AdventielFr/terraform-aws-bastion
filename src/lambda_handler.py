@@ -28,6 +28,8 @@ def main(event, context):
     bucket = s3_resource.Bucket(bucket_url)
     for item in bucket.objects.all():
         key = item.key
+        if key.lower().endswith('readme.txt"):
+            continue
         ssh_public_key = get_public_key(key)
         delete_object = False
         if not ssh_public_key:

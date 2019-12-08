@@ -142,7 +142,7 @@ variable "cloudwatch_log_retention" {
 }
 
 variable "scan_alarm_clock" {
-  description = "The time between two scan to search for expired certificates ( in minutes default 30 minutes)"
+  description = "The time between two scan to find and remove publi SSH key in S3 bucket ( in minutes default 30 minutes)"
   type        = number
   default     = 30
 }

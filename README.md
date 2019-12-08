@@ -55,7 +55,7 @@ Name: **{{environment}}**-bastion
 | private\_security\_group |  | string | "" |
 | public\_security\_group |  | string | "" |
 | region | The deployment aws region | string | n/a |
-| scan\_alarm\_clock | The time between two scan to search for expired certificates ( in minutes default 30 minutes) | number | 30 |
+| scan\_alarm\_clock | The time between two scan to find and remove publi SSH key in S3 bucket ( in minutes default 30 minutes) | number | 30 |
 | tags | A mapping of tags to assign | map | {} |
 | vpc\_id | VPC id were we'll deploy the bastion | string | n/a |
 | with\_auto\_clean\_obsolete\_publc\_keys | Activate or deactivate auto cleaner ssh public key in s3 bucker | bool | true |

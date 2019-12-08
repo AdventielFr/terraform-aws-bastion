@@ -405,7 +405,7 @@ resource "aws_lambda_permission" "find_and_remove_expired_ssh_keys" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.find_and_remove_expired_ssh_keys[0].function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.every_x_minutes.arn
+  source_arn    = aws_cloudwatch_event_rule.every_x_minutes[0].arn
 }
 
 resource "aws_cloudwatch_log_group" "find_and_remove_expired_ssh_keys" {

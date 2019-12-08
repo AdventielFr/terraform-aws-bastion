@@ -320,7 +320,9 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
   statement {
     sid       = "AllowSNSPermissions"
     effect    = "Allow"
-    resources = [aws_sns_topic.find_and_remove_expired_ssh_keys.*.arn]
+    resources = [
+      aws_sns_topic.find_and_remove_expired_ssh_keys.[0].arn
+      ]
 
     actions = [
       "sns:Publish"

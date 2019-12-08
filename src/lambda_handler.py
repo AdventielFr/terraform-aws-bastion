@@ -28,7 +28,7 @@ def main(event, context):
     bucket = s3_resource.Bucket(bucket_url)
     for item in bucket.objects.all():
         key = item.key
-        if key.lower().endswith('readme.txt"):
+        if key.lower().endswith('readme.txt'):
             continue
         ssh_public_key = get_public_key(key)
         delete_object = False
@@ -54,7 +54,7 @@ def to_datetime(data):
 
 def get_public_key(object_name):
     data = next(reversed(list(object_name.split('/'))), '')
-    pattern = '([a-zA-Z0-9_])+_(\\d{14})\\.pub'
+    pattern = '([a-zA-Z0-9-])+-(\\d{14})\\.pub'
     result = re.match(pattern, data)
     if result:
         limit_date = to_datetime(result.group(2))

@@ -297,22 +297,13 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
   statement {
     effect = "Allow"
     resources = [
-      aws_s3_bucket.bucket.arn
+      aws_s3_bucket.bucket.arn,
+      "${aws_s3_bucket.bucket.arn}/*"
     ]
 
     actions = [
       "s3:DeleteObject",
       "s3:GetObject",
-    ]
-  }
-
-  statement {
-    effect = "Allow"
-    resources = [
-      "${aws_s3_bucket.bucket.arn}/*"
-    ]
-
-    actions = [
       "s3:ListBucket"
     ]
   }

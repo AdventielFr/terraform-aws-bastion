@@ -58,7 +58,7 @@ variable "bastion_host_key_pair" {
 variable "bastion_instance_type" {
   type        = string
   description = "The ec2 instance type for the bastion"
-  default     = "t2.nano"
+  default     = "t3.nano"
 }
 
 variable "bastion_dns_zone_id" {

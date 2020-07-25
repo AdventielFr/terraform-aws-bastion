@@ -338,14 +338,14 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
 
 resource "aws_iam_policy" "find_and_remove_expired_ssh_keys" {
   count  = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  name   = "bastion-find-and-remove-expired-ssh-keys-policy"
+  name   = "${var.environment}-bastion-find-and-remove-expired-ssh-keys-policy"
   policy = data.aws_iam_policy_document.find_and_remove_expired_ssh_keys.json
 }
 
 resource "aws_iam_role" "find_and_remove_expired_ssh_keys" {
   count              = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  name               = "bastion-find-and-remove-expired-ssh-keys-role"
-  description        = "Set of access policies granted to lambda Bastion find and remove expired public SSH key}"
+  name               = "${var.environment}-bastion-find-and-remove-expired-ssh-keys-role"
+  description        = "Set of access policies granted to lambda Bastion find and remove expired public SSH key"
   assume_role_policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -371,7 +371,7 @@ resource "aws_iam_role_policy_attachment" "find_and_remove_expired_ssh_keys" {
 
 resource "aws_lambda_function" "find_and_remove_expired_ssh_keys" {
   count         = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  function_name = "bastion-find-and-remove-expired-ssh-keys"
+  function_name = "${var.environment}-bastion-find-and-remove-expired-ssh-keys"
   memory_size   = 128
   description   = "Find and remove public SSH Key in AWS S3 bucket who are obsolete"
   timeout       = 60
@@ -387,7 +387,7 @@ resource "aws_lambda_function" "find_and_remove_expired_ssh_keys" {
     }
   }
 
-  tags = merge(local.tags, map("Lambda", "bastion-find-and-remove-expired-ssh-keys"))
+  tags = merge(local.tags, map("Lambda", "${var.environment}-bastion-find-and-remove-expired-ssh-keys"))
 
   depends_on = [
     aws_iam_role_policy_attachment.find_and_remove_expired_ssh_keys,
@@ -406,13 +406,13 @@ resource "aws_lambda_permission" "find_and_remove_expired_ssh_keys" {
 
 resource "aws_cloudwatch_log_group" "find_and_remove_expired_ssh_keys" {
   count             = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  name              = "/aws/lambda/bastion-find-and-remove-expired-ssh-keys"
+  name              = "/aws/lambda/${var.environment}-bastion-find-and-remove-expired-ssh-keys"
   retention_in_days = var.cloudwatch_log_retention
 }
 
 resource "aws_cloudwatch_event_rule" "find_and_remove_expired_ssh_keys" {
   count               = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  name                = "bastion-find-and-remove-expired-ssh-keys-schedule"
+  name                = "${var.environment}-bastion-find-and-remove-expired-ssh-keys-schedule"
   schedule_expression = "rate(${var.scan_alarm_clock} minutes)"
 }
 
@@ -425,7 +425,7 @@ resource "aws_cloudwatch_event_target" "find_and_remove_expired_ssh_keys" {
 
 resource "aws_sns_topic" "find_and_remove_expired_ssh_keys" {
   count        = var.with_auto_clean_obsolete_publc_keys ? 1 : 0
-  name         = "bastion-find-and-remove-expired-ssh-keys-result"
+  name         = "${var.environment}-bastion-find-and-remove-expired-ssh-keys-result"
   display_name = "Topic for Bastion Find and Remove SSH public expired key result"
   tags         = local.tags
 }

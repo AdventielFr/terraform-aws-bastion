@@ -42,7 +42,7 @@ resource "null_resource" "tags_as_list_of_maps" {
 
 resource "aws_s3_bucket" "bucket" {
   bucket = var.bucket_name
-  acl    = "bucket-owner-full-control"
+  acl    = "private"
 
   force_destroy = var.bucket_force_destroy
 
@@ -312,8 +312,8 @@ data "aws_iam_policy_document" "find_and_remove_expired_ssh_keys" {
   }
 
   statement {
-    sid       = "AllowSNSPermissions"
-    effect    = "Allow"
+    sid    = "AllowSNSPermissions"
+    effect = "Allow"
     resources = [
       aws_sns_topic.find_and_remove_expired_ssh_keys[0].arn
     ]
